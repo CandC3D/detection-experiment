@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Debrief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;700&family=Instrument+Serif&family=DM+Mono&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<noscript>
+<div class="noscript">This page requires JavaScript to display your debrief.</div>
+</noscript>
+
+<main class="container">
+  <div id="debrief-content" hidden>
+    <header class="site-header">
+      <p class="eyebrow">Debrief</p>
+      <h1>Thank you for participating.</h1>
+    </header>
+
+    <section class="prose">
+      <p>The exercise you just completed was not a calibration tool for an AI-detection system. It was an experiment designed to test whether people can reliably distinguish human-written text from AI-generated text &mdash; and whether the confidence they bring to that judgment is warranted.</p>
+
+      <p id="branch-reveal">You were assigned to Branch <strong id="branch-letter">&mdash;</strong>.</p>
+
+      <div id="branch-explanation"></div>
+
+      <h2>Your ratings</h2>
+      <div id="summary-block" class="summary-block"></div>
+
+      <h2>A note on the texts</h2>
+      <p>One essay in the corpus (Andy Warhol, Grok) is a sub-paragraph cut at a sentence boundary; all 49 other excerpts end at paragraph boundaries.</p>
+
+      <h2>A request</h2>
+      <p>If you found this exercise interesting, we ask that you share the link with others who might take it. The experiment's findings are strongest with a larger participant pool, and the design depends on participants not knowing the real question in advance &mdash; so please do not describe the nature of the experiment to people you plan to send it to.</p>
+
+      <div class="share-row">
+        <input type="text" id="share-url" readonly>
+        <button type="button" class="button-secondary" id="copy-button">Copy link</button>
+      </div>
+      <p class="share-confirm" id="copy-confirm" hidden>Link copied.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>Your responses have been recorded anonymously.</p>
+    </footer>
+  </div>
+
+  <div id="debrief-fallback" class="debrief-fallback" hidden>
+    <p>No session data found. You may have navigated here directly or your session may have expired. Please <a href="index.html">return to the beginning</a> to complete the exercise.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  const contentEl = document.getElementById('debrief-content');
+  const fallbackEl = document.getElementById('debrief-fallback');
+
+  let payload = null;
+  try { payload = window.sessionStorage.getItem('debrief_payload'); } catch (_) {}
+
+  let data = null;
+  if (payload) {
+    try { data = JSON.parse(payload); } catch (_) { data = null; }
+  }
+
+  if (!data || !data.branch || !Array.isArray(data.responses)) {
+    fallbackEl.hidden = false;
+    return;
+  }
+
+  contentEl.hidden = false;
+
+  const branchEl = document.getElementById('branch-letter');
+  const explanationEl = document.getElementById('branch-explanation');
+  const summaryEl = document.getElementById('summary-block');
+
+  {
+    branchEl.textContent = data.branch;
+
+    const responses = data.responses || [];
+    const NAIVE_SOURCES = ['ChatGPT', 'DeepSeek', 'Grok'];
+    const meanFor = (filterFn) => {
+      const subset = responses.filter(filterFn);
+      if (!subset.length) return null;
+      return (subset.reduce((s, r) => s + Number(r.human_likeness || 0), 0) / subset.length).toFixed(2);
+    };
+    const avgLikeness = responses.length
+      ? (responses.reduce((s, r) => s + Number(r.human_likeness || 0), 0) / responses.length).toFixed(2)
+      : '—';
+    const humanAvg = meanFor(r => r.source === 'Human');
+    const naiveAvg = meanFor(r => NAIVE_SOURCES.indexOf(r.source) !== -1);
+    const evasiveAvg = meanFor(r => r.source === 'Evasive');
+
+    let explanation = '';
+    if (data.branch === 'A') {
+      explanation = `
+        <p>You were told that the nine essays were AI-generated. In fact, <strong>all nine were written by human students</strong>. Your average human-likeness rating was <strong>${avgLikeness}</strong> out of 5. A rating below 5 means you judged at least some human writing as machine-like &mdash; a false positive under the framing you were given.</p>
+        <p>Branch A measures how the "AI" framing biases perception of writing that is, in fact, entirely human.</p>`;
+    } else if (data.branch === 'B') {
+      explanation = `
+        <p>You were told that the essays were a mix of human and AI writing. In fact, <strong>all nine were AI-generated</strong>, drawn from ChatGPT, DeepSeek, and Grok (three essays from each). Your average human-likeness rating was <strong>${avgLikeness}</strong> out of 5. Any rating above 1 indicates that at least some AI writing read as plausibly human to you.</p>
+        <p>Branch B measures how readily AI prose passes as human when a reader is told some of it might be.</p>`;
+    } else if (data.branch === 'C') {
+      const humanMean = humanAvg ?? '—';
+      const naiveMean = naiveAvg ?? '—';
+      const evasiveMean = evasiveAvg ?? '—';
+      const evasionGap = (naiveAvg !== null && evasiveAvg !== null)
+        ? (Number(evasiveAvg) - Number(naiveAvg)).toFixed(2)
+        : '—';
+      explanation = `
+        <p>You were told that the essays were a mix of human and AI writing. In fact, you read <strong>three human-written essays, three unmodified AI essays</strong> (one each from ChatGPT, DeepSeek, and Grok), <strong>and three AI essays that were prompted to mimic human writing</strong> &mdash; presented in random order.</p>
+        <ul>
+          <li>Average rating you gave the <strong>human</strong> essays: ${humanMean} / 5</li>
+          <li>Average rating you gave the <strong>standard AI</strong> essays: ${naiveMean} / 5</li>
+          <li>Average rating you gave the <strong>evasive AI</strong> essays: ${evasiveMean} / 5</li>
+          <li>Evasion lift (evasive &minus; standard AI): ${evasionGap}</li>
+        </ul>
+        <p>The gap between your human and AI means measures whether you discriminated at all. The evasion lift measures whether AI prompted to mimic human writing read as more human-like to you than unmodified AI output.</p>`;
+    }
+
+    explanationEl.innerHTML = explanation;
+
+    const confidence = data.self_assessment != null ? data.self_assessment : '—';
+    summaryEl.innerHTML = `
+      <p>You rated your general ability to distinguish AI from human writing at <strong>${confidence}</strong> out of 5.</p>
+      <p>Your ratings have been recorded and will contribute to the published findings.</p>
+    `;
+
+    window.sessionStorage.removeItem('debrief_payload');
+  }
+
+  const shareInput = document.getElementById('share-url');
+  const shareUrl = window.location.origin + window.location.pathname.replace(/debrief\.html$/, '');
+  shareInput.value = shareUrl;
+
+  document.getElementById('copy-button').addEventListener('click', function () {
+    shareInput.select();
+    shareInput.setSelectionRange(0, shareInput.value.length);
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareInput.value);
+        ok = true;
+      } else {
+        ok = document.execCommand('copy');
+      }
+    } catch (_) { ok = false; }
+    const confirmEl = document.getElementById('copy-confirm');
+    confirmEl.textContent = ok ? 'Link copied.' : 'Press Ctrl/Cmd+C to copy.';
+    confirmEl.hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

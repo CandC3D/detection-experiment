@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Calibration Task</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;700&family=Instrument+Serif&family=DM+Mono&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<noscript>
+<div class="noscript">This calibration exercise requires JavaScript. Please enable JavaScript and reload the page.</div>
+</noscript>
+
+<main class="container container-wide">
+  <header class="experiment-header">
+    <p class="eyebrow" id="progress-label">Essay 1 of 9</p>
+    <div class="progress-bar" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+  </header>
+
+  <section id="instructions-panel" class="panel" hidden>
+    <h2>Instructions</h2>
+    <p id="instructions-text"></p>
+    <p>For each essay you will: (1) read the text in full, (2) rate how human-like the writing is on a 1&ndash;5 scale, and (3) indicate which system, if any, you believe produced it.</p>
+    <p>Ratings are locked once submitted. There is no back button.</p>
+    <div class="action-row">
+      <button type="button" class="button-primary" id="start-button">Begin</button>
+    </div>
+  </section>
+
+  <section id="essay-panel" class="panel" hidden>
+    <article class="essay">
+      <h2 id="essay-topic"></h2>
+      <div id="essay-text" class="essay-text"></div>
+    </article>
+
+    <form id="rating-form" class="rating-form" novalidate>
+      <fieldset class="rating-fieldset">
+        <legend>How human-like is this essay's writing?</legend>
+        <div class="scale" id="likeness-scale" role="radiogroup" aria-label="Human-likeness rating">
+          <!-- 1..5 injected -->
+        </div>
+        <div class="scale-labels"><span>Least human-like</span><span>Most human-like</span></div>
+      </fieldset>
+
+      <fieldset class="attribution-fieldset">
+        <legend>If AI was used to generate this essay, which system do you think produced it?</legend>
+        <div id="attribution-options" class="attribution-options"></div>
+      </fieldset>
+
+      <div class="action-row">
+        <button type="submit" class="button-primary" id="next-button">Next</button>
+      </div>
+      <p class="form-error" id="form-error" hidden>Please complete both questions before continuing.</p>
+    </form>
+  </section>
+
+  <section id="self-assessment-panel" class="panel" hidden>
+    <h2>One final question</h2>
+    <form id="self-assessment-form" class="rating-form">
+      <fieldset class="rating-fieldset">
+        <legend>How confident are you in your general ability to distinguish AI-generated text from human-written text?</legend>
+        <div class="scale" id="confidence-scale" role="radiogroup" aria-label="Confidence rating">
+          <!-- 1..5 injected -->
+        </div>
+        <div class="scale-labels"><span>Not confident</span><span>Very confident</span></div>
+      </fieldset>
+      <div class="action-row">
+        <button type="submit" class="button-primary" id="submit-button">Submit</button>
+      </div>
+      <p class="form-error" id="confidence-error" hidden>Please select a rating.</p>
+    </form>
+  </section>
+
+  <section id="submitting-panel" class="panel" hidden>
+    <h2>Submitting your responses&hellip;</h2>
+    <p id="submit-status">Please do not close this window.</p>
+  </section>
+</main>
+
+<script src="assets/experiment.js"></script>
+</body>
+</html>

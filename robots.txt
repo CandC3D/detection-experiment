@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The experiment and debrief pages carry a noindex meta tag and are intentionally
+# omitted from the sitemap so the post-completion reveal is not surfaced in search.
+
+Sitemap: https://candc3d.github.io/detection-experiment/sitemap.xml
