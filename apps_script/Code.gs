@@ -4,7 +4,8 @@
  * Deployment:
  *   1. Create a new Google Sheet. Add a single tab with this header row in row 1:
  *      timestamp | session_id | branch | started_at | completed_at | self_assessment |
- *      position | essay_id | topic_id | source | human_likeness | attribution
+ *      position | essay_id | topic_id | source | human_likeness | attribution |
+ *      reasoning_codes
  *   2. Extensions -> Apps Script. Paste this file in as Code.gs.
  *   3. Deploy -> New deployment -> Web app. Execute as "Me". Who has access: "Anyone".
  *   4. Copy the /exec URL into assets/experiment.js as BACKEND_URL.
@@ -32,7 +33,8 @@ function doPost(e) {
         r.topic_id,
         r.source,
         r.human_likeness,
-        r.attribution
+        r.attribution,
+        r.reasoning_codes || ''
       ];
     });
 
