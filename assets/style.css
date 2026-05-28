@@ -316,6 +316,37 @@ legend {
   height: 0;
 }
 
+/* --- Reasoning codes (multi-select checkboxes) --- */
+
+.reasoning-options { display: flex; flex-direction: column; gap: 0.4rem; }
+.reasoning-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--light);
+  background: var(--bg-alt);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--ink);
+  transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.reasoning-options label:hover { border-color: var(--ink); background: var(--bg); }
+.reasoning-options label.selected {
+  border-color: var(--ink);
+  background: var(--bg);
+  box-shadow: inset 3px 0 0 var(--pumpkin);
+}
+.reasoning-options label:focus-within { outline: 3px solid var(--pumpkin); outline-offset: 2px; }
+.reasoning-options input {
+  margin: 0;
+  accent-color: var(--pumpkin);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 /* --- Errors --- */
 
 .form-error {
